@@ -1,4 +1,4 @@
-# README - Maturitní Projekt: Autíčko ovládané ESP32 a Android aplikací
+# Maturitní Projekt: Autíčko ovládané ESP32 a Android aplikací
 
 ## Popis projektu
 
