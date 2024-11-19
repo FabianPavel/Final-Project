@@ -66,3 +66,8 @@ Tento projekt je chráněn licencí MIT. Můžete jej volně používat, kopíro
 ---
 
 Doufám, že vám tento návod pomůže při realizaci vlastního autíčka ovládaného pomocí ESP32 a Android aplikace. Pokud máte jakékoliv dotazy, neváhejte mě kontaktovat.
+
+
+
+Podměty do dokumentaci
+nové verze androidu automaticky mění http na https proto pro funguvání zobrazení streamu musí být vyoučena adresa z toho pravidla 
