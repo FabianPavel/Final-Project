@@ -15,6 +15,7 @@
         <!-- Main activity declaration with android:exported set to true -->
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="landscape"
             android:exported="true"> <!-- This allows the activity to be launched by other apps -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
