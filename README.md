@@ -71,3 +71,10 @@ Doufám, že vám tento návod pomůže při realizaci vlastního autíčka ovl�
 
 Podměty do dokumentaci
 nové verze androidu automaticky mění http na https proto pro funguvání zobrazení streamu musí být vyoučena adresa z toho pravidla 
+
+
+šablona dokumentace:
+- zapojení
+- stream kamery a přenos do aplikace
+- komunikace tlačítek pro ovládání motorů
+- aplikace a vzhled
