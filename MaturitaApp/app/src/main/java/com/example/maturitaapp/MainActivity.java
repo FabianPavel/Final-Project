@@ -1,21 +1,25 @@
 package com.example.maturitaapp;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
+    private String espIpAddress; // Removed default IP address
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
         // Ensures links open within the WebView
         webView.setWebViewClient(new WebViewClient());
 
-        // Load the ESP32-CAM video stream URL
-        webView.loadUrl("http://192.168.80.72:81/stream");
+        // Show the IP prompt dialog
+        promptForIpAddress();
 
         // Bind buttons to control motors
         Button btnUp = findViewById(R.id.btnUp);
@@ -56,23 +60,63 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Function to show the dialog for IP address input
+    private void promptForIpAddress() {
+        // Create a dialog for IP input
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter IP Address");
+
+        // Inflate the custom layout with an EditText
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.ip_input, null);
+        builder.setView(dialogView);
+
+        // Bind the EditText for input
+        EditText ipInput = dialogView.findViewById(R.id.editTextIpAddress);
+
+        // Configure buttons
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String ipAddress = ipInput.getText().toString().trim();
+            if (!ipAddress.isEmpty()) {
+                espIpAddress = ipAddress;  // No default IP, use the user input
+                String videoUrl = "http://" + espIpAddress + ":81/stream";
+                webView.loadUrl(videoUrl);
+                Toast.makeText(this, "Connecting to " + videoUrl, Toast.LENGTH_SHORT).show();
+            } else {
+                // Show the dialog again if no IP is entered
+                dialog.dismiss();
+                promptForIpAddress();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+            finish(); // Exit the app if the user cancels
+        });
+
+        // Make the dialog non-cancelable to ensure the user inputs an IP
+        builder.setCancelable(false);
+        builder.show();
+    }
+
     // Function to send commands to ESP32
     private void sendCommandToESP(String command) {
         new Thread(() -> {
             try {
-                // Replace with your ESP32's endpoint for motor control
-                String espUrl = "http://192.168.80.72/control?command=" + command;
+                // Build the ESP32 URL with the user-provided IP
+                String espUrl = "http://" + espIpAddress + "/control?command=" + command;
                 URL url = new URL(espUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setDoOutput(true);
 
+                // Optional: Read the response
                 int responseCode = connection.getResponseCode();
-                /*if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // Command sent successfully
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    System.out.println("Command sent successfully: " + command);
                 } else {
-                    // Handle error
-                }*/
+                    System.out.println("Failed to send command: " + command);
+                }
 
                 connection.disconnect();
             } catch (Exception e) {
