@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.1"
+javaWebsocket = "1.5.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -10,6 +11,7 @@ constraintlayout = "2.1.4"
 mjpegView = "4.0.0"
 
 [libraries]
+java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "javaWebsocket" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -17,7 +19,7 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-mjpeg-view = { module = "com.github.niqdev:mjpeg-view", version.ref = "mjpegView" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
