@@ -5,10 +5,12 @@
 
 #define CAMERA_MODEL_AI_THINKER
 #include "camera_pins.h"
+#include "security.h"
 
 // WiFi Credentials
-const char* ssid = "Wifi";
-const char* password = "wifi1234";
+//saved in security.h
+const char* ssid = SSID; 
+const char* password = passwd;
 
 // WebSocket Server
 WebSocketsServer webSocket(81);
