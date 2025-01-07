@@ -3,24 +3,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Ovládací tlačítka vlevo -->
+    <!-- Left side: Control Buttons (LED and Settings) -->
     <LinearLayout
-        android:id="@+id/controlPanel"
+        android:id="@+id/leftPanel"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
         android:orientation="vertical"
         android:gravity="center"
         android:padding="16dp">
 
-        <!-- Tlačítka v kříži -->
+        <!-- LED Control Button -->
+        <Button
+            android:id="@+id/btnLed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LED" />
+
+        <!-- Settings Button -->
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings" />
+    </LinearLayout>
+
+    <!-- Center: WebView -->
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@id/leftPanel"
+        android:layout_toStartOf="@id/rightPanel"
+        android:layout_alignParentTop="true" />
+
+    <!-- Right side: Arrow Control Buttons -->
+    <LinearLayout
+        android:id="@+id/rightPanel"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <!-- Up Arrow Button -->
         <Button
             android:id="@+id/btnUp"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:text="@string/arrow_up" />
 
+        <!-- Left and Right Arrow Buttons -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,6 +78,7 @@
                 android:text="@string/arrow_right" />
         </LinearLayout>
 
+        <!-- Down Arrow Button -->
         <Button
             android:id="@+id/btnDown"
             android:layout_width="60dp"
@@ -51,11 +86,4 @@
             android:text="@string/arrow_down" />
     </LinearLayout>
 
-    <!-- WebView napravo -->
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_toEndOf="@id/controlPanel"
-        android:layout_alignParentTop="true" />
 </RelativeLayout>

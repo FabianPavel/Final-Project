@@ -124,8 +124,14 @@ public class MainActivity extends AppCompatActivity {
         Button btnDown = findViewById(R.id.btnDown);
         Button btnLeft = findViewById(R.id.btnLeft);
         Button btnRight = findViewById(R.id.btnRight);
+        Button btnLed = findViewById(R.id.btnLed);
 
         // Define control actions for each button
+
+        btnLed.setOnClickListener(v -> {
+            sendCommand("led");  // Send 'led' message via WebSocket
+        });
+
         btnUp.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:

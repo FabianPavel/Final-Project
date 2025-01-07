@@ -44,6 +44,7 @@ void stopMotors() {
 // WiFi Credentials
 const char* ssid = SSID; 
 const char* password = passwd;
+bool isOn = false;
 
 // WebSocket Server
 WebSocketsServer webSocket(81);
@@ -75,12 +76,16 @@ void handleWebSocketMessage(uint8_t num, WStype_t type, uint8_t *payload, size_t
     else if (message == "right") {
       turnRight();
     }
-    else if(message == "lightOn"){
-      digitalWrite(LED_GPIO_NUM, HIGH);
-    } 
-    else if(message == "lightOff"){
-      digitalWrite(LED_GPIO_NUM, LOW);
-    } 
+    else if(message == "led"){
+      if(isOn == false){
+        digitalWrite(LED_GPIO_NUM, HIGH);
+        isOn = true;
+      }
+      else{
+        digitalWrite(LED_GPIO_NUM, LOW);
+        isOn = false;
+      }
+    }
     else if(message == "stop"){
       stopMotors();
     }
@@ -205,6 +210,8 @@ void setup() {
   }
   Serial.println();
   Serial.println("WiFi connected");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
 
   // Start camera server and WebSocket server
   startCameraServer();
