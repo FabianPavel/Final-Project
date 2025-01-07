@@ -1,4 +1,4 @@
-#if defined(CAMERA_MODEL_AI_THINKER)
+//camera pins
 #define PWDN_GPIO_NUM  32
 #define RESET_GPIO_NUM -1
 #define XCLK_GPIO_NUM  0
@@ -17,6 +17,10 @@
 #define HREF_GPIO_NUM  23
 #define PCLK_GPIO_NUM  22
 
-// 4 for flash led or 33 for normal led
 #define LED_GPIO_NUM   4
-#endif
+
+//motor pins
+#define IN1 12
+#define IN2 13
+#define IN3 14
+#define IN4 15

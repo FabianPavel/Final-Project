@@ -1,14 +1,15 @@
 package com.example.maturitaapp;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.InputType;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,21 +42,18 @@ public class MainActivity extends AppCompatActivity {
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
-        // "OK" button
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ipAddress = input.getText().toString().trim();
-                if (validateIpAddress(ipAddress)) {
-                    setupUi(ipAddress);
-                } else {
-                    Toast.makeText(MainActivity.this, "Invalid IP Address", Toast.LENGTH_SHORT).show();
-                    showIpInputDialog(); // Retry on invalid input
-                }
+        // "OK" button with lambda expression
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            ipAddress = input.getText().toString().trim();
+            if (validateIpAddress(ipAddress)) {
+                setupUi(ipAddress);
+            } else {
+                Toast.makeText(MainActivity.this, "Invalid IP Address", Toast.LENGTH_SHORT).show();
+                showIpInputDialog(); // Retry on invalid input
             }
         });
 
-        // "Cancel" button
+        // "Cancel" button with lambda expression
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.cancel();
             finish(); // Close the app if the user cancels
@@ -76,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setJavaScriptEnabled(true);
 
         // Load MJPEG stream from ESP32
-        webView.loadUrl("http://" + ipAddress   );
+        webView.loadUrl("http://" + ipAddress);
 
         // Initialize WebSocket for control messages
         connectToWebSocket(ipAddress);
@@ -119,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         mWebSocketClient.connect();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setupControlButtons() {
         // Control buttons initialization
         Button btnUp = findViewById(R.id.btnUp);
@@ -127,10 +126,57 @@ public class MainActivity extends AppCompatActivity {
         Button btnRight = findViewById(R.id.btnRight);
 
         // Define control actions for each button
-        btnUp.setOnClickListener(v -> sendCommand("forward"));
-        btnDown.setOnClickListener(v -> sendCommand("backward"));
-        btnLeft.setOnClickListener(v -> sendCommand("left"));
-        btnRight.setOnClickListener(v -> sendCommand("right"));
+        btnUp.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    sendCommand("forward"); // Command when button is pressed down
+                    break;
+                case MotionEvent.ACTION_UP:
+                    sendCommand("stop"); // Stop when button is released
+                    break;
+            }
+            v.performClick(); // Ensure performClick() is called
+            return true;
+        });
+
+        btnDown.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    sendCommand("backward"); // Command when button is pressed down
+                    break;
+                case MotionEvent.ACTION_UP:
+                    sendCommand("stop"); // Stop when button is released
+                    break;
+            }
+            v.performClick(); // Ensure performClick() is called
+            return true;
+        });
+
+        btnLeft.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    sendCommand("left"); // Command when button is pressed down
+                    break;
+                case MotionEvent.ACTION_UP:
+                    sendCommand("stop"); // Stop when button is released
+                    break;
+            }
+            v.performClick(); // Ensure performClick() is called
+            return true;
+        });
+
+        btnRight.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    sendCommand("right"); // Command when button is pressed down
+                    break;
+                case MotionEvent.ACTION_UP:
+                    sendCommand("stop"); // Stop when button is released
+                    break;
+            }
+            v.performClick(); // Ensure performClick() is called
+            return true;
+        });
     }
 
     private void sendCommand(String command) {

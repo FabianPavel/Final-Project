@@ -3,12 +3,45 @@
 #include <esp_http_server.h>
 #include <WebSocketsServer.h>
 
-#define CAMERA_MODEL_AI_THINKER
-#include "camera_pins.h"
+#include "pins.h"
 #include "security.h"
 
+void backward() {
+  digitalWrite(IN1, HIGH);  // Motor 1 forward
+  digitalWrite(IN2, LOW);   // Motor 1 forward
+  digitalWrite(IN3, HIGH);  // Motor 2 forward
+  digitalWrite(IN4, LOW);   // Motor 2 forward
+}
+
+void forward() {
+  digitalWrite(IN1, LOW);   // Motor 1 backward
+  digitalWrite(IN2, HIGH);  // Motor 1 backward
+  digitalWrite(IN3, LOW);   // Motor 2 backward
+  digitalWrite(IN4, HIGH);  // Motor 2 backward
+}
+
+void turnRight() {
+  digitalWrite(IN1, LOW);   // Motor 1 backward
+  digitalWrite(IN2, HIGH);  // Motor 1 backward
+  digitalWrite(IN3, HIGH);  // Motor 2 forward
+  digitalWrite(IN4, LOW);   // Motor 2 forward
+}
+
+void turnLeft() {
+  digitalWrite(IN1, HIGH);  // Motor 1 forward
+  digitalWrite(IN2, LOW);   // Motor 1 forward
+  digitalWrite(IN3, LOW);   // Motor 2 backward
+  digitalWrite(IN4, HIGH);  // Motor 2 backward
+}
+
+void stopMotors() {
+  digitalWrite(IN1, LOW);  // Motor 1 stop
+  digitalWrite(IN2, LOW);  // Motor 1 stop
+  digitalWrite(IN3, LOW);  // Motor 2 stop
+  digitalWrite(IN4, LOW);  // Motor 2 stop
+}
+
 // WiFi Credentials
-//saved in security.h
 const char* ssid = SSID; 
 const char* password = passwd;
 
@@ -18,8 +51,6 @@ WebSocketsServer webSocket(81);
 // HTTP Server
 httpd_handle_t stream_httpd = NULL;
 
-// Flag to check if IP address is printed
-bool ipPrinted = false;
 
 // WebSocket event handler
 void handleWebSocketMessage(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
@@ -31,17 +62,30 @@ void handleWebSocketMessage(uint8_t num, WStype_t type, uint8_t *payload, size_t
     String message = String((char*)payload);
     Serial.println("WebSocket: Received message: " + message);
 
-    // Add motor control logic here
+    //event handler for commands
     if (message == "forward") {
-      Serial.println("Moving forward");
-    } else if (message == "backward") {
-      Serial.println("Moving backward");
-    } else if (message == "left") {
-      Serial.println("Turning left");
-    } else if (message == "right") {
-      Serial.println("Turning right");
-    } else {
-      Serial.println("Unknown command");
+      forward();
+    } 
+    else if (message == "backward") {
+      backward();
+    } 
+    else if (message == "left") {
+      turnLeft();
+    } 
+    else if (message == "right") {
+      turnRight();
+    }
+    else if(message == "lightOn"){
+      digitalWrite(LED_GPIO_NUM, HIGH);
+    } 
+    else if(message == "lightOff"){
+      digitalWrite(LED_GPIO_NUM, LOW);
+    } 
+    else if(message == "stop"){
+      stopMotors();
+    }
+    else {
+      Serial.println("unknow command");
     }
   }
 }
@@ -105,6 +149,21 @@ void startCameraServer() {
 void setup() {
   Serial.begin(115200);
 
+  // Initialize the LED pin as output
+  pinMode(LED_GPIO_NUM, OUTPUT);
+
+  // Initializ motor pins
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  //Stop motors on start
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+
   // Camera initialization
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -127,7 +186,9 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_UXGA;
+  //config.frame_size = FRAMESIZE_UXGA; //large video 1600 x 1200
+  config.frame_size = FRAMESIZE_VGA; //medium video 640 x 480
+  //config.frame_size = FRAMESIZE_QVGA; //small video 320 x 240
   config.jpeg_quality = 25; // 0 to 63, lower better quality
   config.fb_count = 1;
 
@@ -145,19 +206,11 @@ void setup() {
   Serial.println();
   Serial.println("WiFi connected");
 
-  // Print the IP address only once
-  if (!ipPrinted) {
-    Serial.print("IP Address: ");
-    Serial.println(WiFi.localIP());
-    ipPrinted = true; // Mark IP as printed
-  }
-
   // Start camera server and WebSocket server
   startCameraServer();
   webSocket.begin();
   webSocket.onEvent(handleWebSocketMessage);
 
-  // Only print the IP address once
   Serial.println("Setup complete");
 }
 
