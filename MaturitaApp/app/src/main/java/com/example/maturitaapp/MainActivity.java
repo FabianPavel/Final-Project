@@ -6,6 +6,7 @@ import android.text.InputType;
 import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.app.AlertDialog;
 import android.webkit.WebSettings;
@@ -31,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Prompt user for IP address
         showIpInputDialog();
+
+        // Setup Settings button
+        Button btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(v -> openSettingsScreen());
     }
 
     private void showIpInputDialog() {
@@ -42,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
-        // "OK" button with lambda expression
         builder.setPositiveButton("OK", (dialog, which) -> {
             ipAddress = input.getText().toString().trim();
             if (validateIpAddress(ipAddress)) {
@@ -53,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // "Cancel" button with lambda expression
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.cancel();
             finish(); // Close the app if the user cancels
@@ -68,13 +71,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupUi(String ipAddress) {
-        // Initialize WebView for video streaming
-        webView = findViewById(R.id.webView);
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
+        try {
+            // Initialize WebView for video streaming
+            webView = findViewById(R.id.webView);
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
 
-        // Load MJPEG stream from ESP32
-        webView.loadUrl("http://" + ipAddress);
+            // Load MJPEG stream from ESP32
+            webView.loadUrl("http://" + ipAddress);
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to load video stream: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 
         // Initialize WebSocket for control messages
         connectToWebSocket(ipAddress);
@@ -84,112 +91,137 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectToWebSocket(String ipAddress) {
-        // WebSocket URI with IP Address
-        String wsUri = "ws://" + ipAddress + ":81/"; // WebSocket address of ESP32
-        URI uri = URI.create(wsUri);
+        try {
+            String wsUri = "ws://" + ipAddress + ":81/";
+            URI uri = URI.create(wsUri);
 
-        mWebSocketClient = new WebSocketClient(uri) {
-            @Override
-            public void onOpen(ServerHandshake handshake) {
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket Connected", Toast.LENGTH_SHORT).show());
-            }
+            mWebSocketClient = new WebSocketClient(uri) {
+                @Override
+                public void onOpen(ServerHandshake handshake) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket Connected", Toast.LENGTH_SHORT).show());
+                }
 
-            @Override
-            public void onMessage(String message) {
-                // Handle incoming messages from WebSocket
-                runOnUiThread(() -> {
-                    // If required, handle commands or feedback from the ESP32 here
-                    Toast.makeText(MainActivity.this, "Message from ESP32: " + message, Toast.LENGTH_SHORT).show();
-                });
-            }
+                @Override
+                public void onMessage(String message) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "Message from ESP32: " + message, Toast.LENGTH_SHORT).show();
+                    });
+                }
 
-            @Override
-            public void onClose(int code, String reason, boolean remote) {
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket Disconnected", Toast.LENGTH_SHORT).show());
-            }
+                @Override
+                public void onClose(int code, String reason, boolean remote) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket Disconnected", Toast.LENGTH_SHORT).show());
+                }
 
-            @Override
-            public void onError(Exception ex) {
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket Error: " + ex.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        };
+                @Override
+                public void onError(Exception ex) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket Error: " + ex.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            };
 
-        mWebSocketClient.connect();
+            mWebSocketClient.connect();
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to connect WebSocket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupControlButtons() {
-        // Control buttons initialization
         Button btnUp = findViewById(R.id.btnUp);
         Button btnDown = findViewById(R.id.btnDown);
         Button btnLeft = findViewById(R.id.btnLeft);
         Button btnRight = findViewById(R.id.btnRight);
         Button btnLed = findViewById(R.id.btnLed);
 
-        // Define control actions for each button
-
-        btnLed.setOnClickListener(v -> {
-            sendCommand("led");  // Send 'led' message via WebSocket
-        });
+        btnLed.setOnClickListener(v -> sendCommand("led"));
 
         btnUp.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    sendCommand("forward"); // Command when button is pressed down
+                    sendCommand("forward");
                     break;
                 case MotionEvent.ACTION_UP:
-                    sendCommand("stop"); // Stop when button is released
+                    sendCommand("stop");
                     break;
             }
-            v.performClick(); // Ensure performClick() is called
+            v.performClick();
             return true;
         });
 
         btnDown.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    sendCommand("backward"); // Command when button is pressed down
+                    sendCommand("backward");
                     break;
                 case MotionEvent.ACTION_UP:
-                    sendCommand("stop"); // Stop when button is released
+                    sendCommand("stop");
                     break;
             }
-            v.performClick(); // Ensure performClick() is called
+            v.performClick();
             return true;
         });
 
         btnLeft.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    sendCommand("left"); // Command when button is pressed down
+                    sendCommand("left");
                     break;
                 case MotionEvent.ACTION_UP:
-                    sendCommand("stop"); // Stop when button is released
+                    sendCommand("stop");
                     break;
             }
-            v.performClick(); // Ensure performClick() is called
+            v.performClick();
             return true;
         });
 
         btnRight.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    sendCommand("right"); // Command when button is pressed down
+                    sendCommand("right");
                     break;
                 case MotionEvent.ACTION_UP:
-                    sendCommand("stop"); // Stop when button is released
+                    sendCommand("stop");
                     break;
             }
-            v.performClick(); // Ensure performClick() is called
+            v.performClick();
             return true;
         });
     }
 
     private void sendCommand(String command) {
-        // Send WebSocket control command to ESP32
         if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
             mWebSocketClient.send(command);
+        } else {
+            Toast.makeText(this, "WebSocket not connected. Command failed: " + command, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void openSettingsScreen() {
+        setContentView(R.layout.settings_layout);
+
+        TextView tvCurrentIp = findViewById(R.id.tvCurrentIp);
+        EditText etNewIp = findViewById(R.id.etNewIp);
+        Button btnSaveIp = findViewById(R.id.btnSaveIp);
+        Button btnBack = findViewById(R.id.btnBack);
+
+        // Show current IP address
+        tvCurrentIp.setText("Current IP: " + ipAddress);
+
+        btnSaveIp.setOnClickListener(v -> {
+            String newIp = etNewIp.getText().toString().trim();
+            if (validateIpAddress(newIp)) {
+                ipAddress = newIp;
+                setupUi(ipAddress); // Reload UI with new IP
+                Toast.makeText(this, "IP Address Updated", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Invalid IP Address", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnBack.setOnClickListener(v -> {
+            setContentView(R.layout.activity_main); // Return to main screen
+            setupUi(ipAddress); // Ensure UI is set up properly
+        });
     }
 
     @Override

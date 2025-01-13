@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Title of Settings -->
+    <TextView
+        android:id="@+id/tvSettingsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textSize="24sp"
+        android:layout_gravity="center"
+        android:paddingBottom="16dp" />
+
+    <!-- Current IP Address -->
+    <TextView
+        android:id="@+id/tvCurrentIp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Current IP: "
+        android:textSize="16sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Input for new IP -->
+    <EditText
+        android:id="@+id/etNewIp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/editbox_background_normal"
+        android:hint="Enter new IP address"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:padding="8dp" />
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/btnSaveIp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save IP"
+        android:layout_marginTop="16dp" />
+
+    <!-- Back Button -->
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
